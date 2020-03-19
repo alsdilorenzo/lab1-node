@@ -1,14 +1,14 @@
 "use strict";
 
-import readline from "readline-sync";
+const readlineSync = require('readline-sync');
 
 function task (desc, prior, visib, deadl){
-    let description = desc;
-    let priority = prior;
-    let visibility = visib;
-    let deadline = deadl || "not specified";
+    this.description = desc;
+    this.priority = prior;
+    this.visibility = visib;
+    this.deadline = deadl.toDateString();
 
-    const show = () => {`toDo: ${description}; ${priority}; ${visibility}; deadline: ${deadline}`};
+    return this;
 }
 
 let allTasks = [];
@@ -26,7 +26,7 @@ const removeTask = (desc) => {
 }
 
 while(running){
-    let input = readline.question(`Please select one of the following actions: \n
+    let input = readlineSync.question(`Please select one of the following actions: \n
     1 - Insert a new task\n
     2 - Remove an existing task\n
     3 - List all current tasks\n
@@ -34,14 +34,14 @@ while(running){
 
     switch(parseInt(input)){
         case 1: {
-            let desc  = readline.question(`Insert the description of the new task: `)
-            let prior = readline.question(`Specify priority (urgent/not urgent(default)): `)
+            let desc  = readlineSync.question(`Insert the description of the new task: `)
+            let prior = readlineSync.question(`Specify priority (urgent/not urgent(default)): `)
             if(prior != "urgent")
                 prior = "not urgent"
-            let visib = readline.question(`Specify visibility(shared/private(default)): `)
+            let visib = readlineSync.question(`Specify visibility(shared/private(default)): `)
             if(visib != "shared")
                 visib = "private"
-            let deadl = readline.question(`Specify deadline as YYYY/MM/DD (optional): `)
+            let deadl = readlineSync.question(`Specify deadline as YYYY/MM/DD (optional): `)
 
             if(desc){
                 let date = new Date(deadl)
@@ -53,16 +53,22 @@ while(running){
             break;
         }
         case 2: {
-            let desc = readline.question(`Specify exact description of the task to remove: `)
+            let desc = readlineSync.question(`Specify exact description of the task to remove: `)
             removeTask(desc)
             break;
         }
         case 3: {
-            allTasks.sort(function(a,b) {
-                let stringA = a.description.toUpperCase()
-                let stringB = b.description.toUpperCase()
-                return (stringA < stringB) ? -1 : (stringA > stringB) ? 1 : 0;
-            })
+            if(allTasks.length){
+                allTasks.sort(function(a,b) {
+                    let stringA = a.description.toUpperCase()
+                    let stringB = b.description.toUpperCase()
+                    return (stringA < stringB) ? -1 : (stringA > stringB) ? 1 : 0;
+                })
+                for(let [i, t] of allTasks.entries())
+                    Object.keys(t).forEach((prop) => console.log(`Task ${i+1} - ${prop}: ${t[prop]}`))
+            }
+            else
+                console.log("No tasks currently present\n")
             break;
         }
         case 4: {
